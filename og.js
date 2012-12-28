@@ -13,13 +13,13 @@ exports = module.exports = function(url, callback){
 			callback(error, result);
 		});
 		if(res.headers['content-type'].indexOf("text/html") === -1){
-			res.destroy();
+			req.abort();
 			error = "that's not a website";
 		} else {
 			res.on('data', function(data){
 				buffer += data;
 				if(buffer.toString().indexOf('</head>') > -1){
-					res.destroy();
+					req.abort();
 					var $ = cheerio.load(buffer);
 					var meta = $('meta');
 					var keys = Object.keys(meta);
@@ -48,14 +48,13 @@ exports = module.exports = function(url, callback){
 							}
 						}
 					});
-				} else if(res.connection.bytesRead > 10240){
-					res.destroy();
+				} else if(res.connection.bytesRead >= 10240){
+					req.abort();
 					error = 'no meta data in first 10 kilobytes';
 				}
 			});
 		}
-	});
-	req.on('error', function(error){
+	}).on('error', function(error){
 		callback(error.message, result);
 	});
 }
