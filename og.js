@@ -6,10 +6,15 @@ exports = module.exports = function(url, callback){
 	var buffer = '';
 	var error = null;
 	var req = http.get(url, function(res){
+		res.on('end', function(){
+			if(!error && Object.keys(result).length === 0){
+				error = "couldn't find meta data";
+			}
+			callback(error, result);
+		});
 		if(res.headers['content-type'].indexOf("text/html") === -1){
 			res.destroy();
 			error = "that's not a website";
-			callback(error, result);
 		} else {
 			res.on('data', function(data){
 				buffer += data;
@@ -43,22 +48,11 @@ exports = module.exports = function(url, callback){
 							}
 						}
 					});
-					if(Object.keys(result).length === 0){
-						error = "couldn't find meta data";
-					}
-					callback(error, result);
 				} else if(res.connection.bytesRead > 10240){
 					res.destroy();
 					error = 'no meta data in first 10 kilobytes';
-					callback(error, result);
 				}
 			});
-			res.on('end', function(){
-				if(Object.keys(result).length === 0){
-					error = "couldn't find meta data";
-				}
-				callback(error, result);
-			})
 		}
 	});
 	req.on('error', function(error){
