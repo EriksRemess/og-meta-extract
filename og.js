@@ -1,16 +1,22 @@
-var http = require('http');
-var cheerio = require('cheerio');
-
 exports = module.exports = function(url, callback){
 	var result = {};
 	var buffer = '';
 	var error = null;
-	var req = http.get(url, function(res){
+	var cheerio = require('cheerio');
+	if(url.indexOf("https:") === 0){
+		var client = require('https');
+	} else if(url.indexOf("http:") === 0){
+		var client = require('http');
+	} else {
+		error = "that's not a website";
+		return callback(error, result);
+	}
+	var req = client.get(url, function(res){
 		res.on('end', function(){
 			if(!error && Object.keys(result).length === 0){
 				error = "couldn't find meta data";
 			}
-			callback(error, result);
+			return callback(error, result);
 		});
 		if(res.headers['content-type'].indexOf("text/html") === -1){
 			req.abort();
@@ -55,6 +61,6 @@ exports = module.exports = function(url, callback){
 			});
 		}
 	}).on('error', function(error){
-		callback(error.message, result);
+		return callback(error.message, result);
 	});
 }
