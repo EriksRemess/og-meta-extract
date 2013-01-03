@@ -75,7 +75,7 @@ var getdata = function(url, callback){
 				if(typeof result['title'] === "undefined"){
 					var title = $('title');
 					if(title.length > 0){
-						result['title'] = $('title')[0].children[0].data;
+						result['title'] = $('title')[0].children[0].data.replace(/^\s+|\s+$/g, "");
 					}
 				}
 				if(typeof result['url'] === "undefined"){
