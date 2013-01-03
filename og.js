@@ -1,5 +1,7 @@
 var cheerio = require('cheerio');
+var real_url = "";
 var getdata = function(url, callback){
+	real_url = url;
 	var result = {};
 	var buffer = '';
 	var error = null;
@@ -11,7 +13,15 @@ var getdata = function(url, callback){
 		error = "that's not a website";
 		return callback(error, result);
 	}
-	var req = client.get(url, function(res){
+	var url_parts = require('url').parse(url);
+	var req = client.get({
+		hostname: url_parts.hostname,
+		path: url_parts.path,
+		method: "GET",
+		headers: {
+			"user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/536.26.17 (KHTML, like Gecko) Version/6.0.2 Safari/536.26.17"
+		}
+	}, function(res){
 		var redirect = false;
 		res.on('end', function(){
 			if(!redirect){
@@ -62,6 +72,15 @@ var getdata = function(url, callback){
 						}
 					}
 				});
+				if(typeof result['title'] === "undefined"){
+					var title = $('title');
+					if(title.length > 0){
+						result['title'] = $('title')[0].children[0].data;
+					}
+				}
+				if(typeof result['url'] === "undefined"){
+					result['url'] = real_url;
+				}
 			} else if(res.connection.bytesRead >= 10240){
 				req.abort();
 				error = 'no meta data in first 10 kilobytes';
