@@ -81,9 +81,9 @@ var getdata = function(url, callback){
 				if(typeof result['url'] === "undefined"){
 					result['url'] = real_url;
 				}
-			} else if(res.connection.bytesRead >= 10240){
+			} else if(res.connection.bytesRead >= 20480){
 				req.abort();
-				error = 'no meta data in first 10 kilobytes';
+				error = 'no meta data in first 20 kilobytes';
 			}
 		});
 	}).on('error', function(error){
