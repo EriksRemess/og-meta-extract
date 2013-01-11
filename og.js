@@ -34,6 +34,10 @@ var getdata = function(url, callback){
 		if(res.statusCode >= 301 && res.statusCode <= 307){
 			redirect = true;
 			req.abort();
+			var redirect_url_parts = require('url').parse(res.headers.location);
+			if(typeof redirect_url_parts.hostname === "undefined"){
+				res.headers.location = url_parts.protocol + "//" + url_parts.hostname + res.headers.location;
+			}
 			return getdata(res.headers.location, callback);
 		}
 		res.on('data', function(data){
